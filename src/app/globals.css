@@ -158,6 +158,7 @@ div[data-media-provider] video {
   background-position: center center !important; /* 居中显示 */
   background-repeat: no-repeat !important; /* 防止重复 */
   background-color: #000 !important; /* 其余区域填充为黑色 */
+  background-image: url('/background.jpg') !important; /* 添加背景图片 */
 }
 
 /* 隐藏移动端竖屏时的 pip 按钮 */
