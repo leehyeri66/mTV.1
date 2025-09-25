@@ -104,16 +104,18 @@ function handleRedirect(response, body) {
   });
 }
 
-// 处理 HTML 内容中的相对路径
+// 处理 HTML 内容中的相对路径和图片HTTPS转换
 async function handleHtmlContent(response, protocol, host, actualUrlStr) {
   const originalText = await response.text();
-  const regex = new RegExp('((href|src|action)=["\'])/(?!/)', 'g');
   let modifiedText = replaceRelativePaths(
     originalText,
     protocol,
     host,
     new URL(actualUrlStr).origin
   );
+
+  // 将HTTP图片链接转换为HTTPS
+  modifiedText = convertImageLinksToHttps(modifiedText);
 
   return modifiedText;
 }
@@ -122,6 +124,50 @@ async function handleHtmlContent(response, protocol, host, actualUrlStr) {
 function replaceRelativePaths(text, protocol, host, origin) {
   const regex = new RegExp('((href|src|action)=["\'])/(?!/)', 'g');
   return text.replace(regex, `$1${protocol}//${host}/${origin}/`);
+}
+
+// 将图片链接从HTTP转换为HTTPS
+function convertImageLinksToHttps(text) {
+  // 匹配img标签中的src属性、CSS中的background-image、以及其他可能包含图片链接的属性
+  const patterns = [
+    // img标签的src属性
+    {
+      regex: /(<img[^>]+src=["'])http:\/\//gi,
+      replacement: '$1https://'
+    },
+    // CSS中的background-image
+    {
+      regex: /(background-image\s*:\s*url\s*\(\s*["']?)http:\/\//gi,
+      replacement: '$1https://'
+    },
+    // CSS中的background
+    {
+      regex: /(background\s*:\s*[^;]*url\s*\(\s*["']?)http:\/\//gi,
+      replacement: '$1https://'
+    },
+    // style属性中的背景图片
+    {
+      regex: /(style\s*=\s*["'][^"']*background[^"']*url\s*\(\s*["']?)http:\/\//gi,
+      replacement: '$1https://'
+    },
+    // link标签的href属性（用于图标等）
+    {
+      regex: /(<link[^>]+href=["'])http:\/\/([^"']*\.(ico|png|jpg|jpeg|gif|svg|webp))/gi,
+      replacement: '$1https://$2'
+    },
+    // 其他可能包含图片的属性
+    {
+      regex: /((?:data-src|data-background|poster)=["'])http:\/\//gi,
+      replacement: '$1https://'
+    }
+  ];
+
+  let result = text;
+  patterns.forEach(pattern => {
+    result = result.replace(pattern.regex, pattern.replacement);
+  });
+
+  return result;
 }
 
 // 返回 JSON 格式的响应
