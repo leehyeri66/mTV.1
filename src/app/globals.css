@@ -29,17 +29,25 @@ body {
   color: rgb(var(--foreground-rgb));
 }
 
+/* 浅色模式背景 - 使用自定义图片 */
 html:not(.dark) body {
-  background: linear-gradient(
-    180deg,
-    #e6f3fb 0%,
-    #eaf3f7 18%,
-    #f7f7f3 38%,
-    #e9ecef 60%,
-    #dbe3ea 80%,
-    #d3dde6 100%
-  );
+  /* 移动端背景 */
+  background-image: url('/backgrounds/bg1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+/* 桌面端背景 */
+@media (min-width: 768px) {
+  html:not(.dark) body {
+    background-image: url('/backgrounds/bg2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
 }
 
 /* 自定义滚动条样式 */
